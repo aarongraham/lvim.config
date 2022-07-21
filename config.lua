@@ -8,6 +8,8 @@ an executable
 ]]
 -- THESE ARE EXAMPLE CONFIGS FEEL FREE TO CHANGE TO WHATEVER YOU WANT
 
+vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
+
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save = true
@@ -53,6 +55,7 @@ lvim.builtin.telescope.defaults.mappings = {
 --   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
 --   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
 -- }
+lvim.builtin.which_key.mappings["q"] = { "<cmd>qall<CR>", "Quit" }
 
 -- TODO: User Config for predefined plugins
 -- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
@@ -62,7 +65,12 @@ lvim.builtin.notify.active = true
 lvim.builtin.terminal.active = true
 lvim.builtin.nvimtree.setup.view.side = "left"
 lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
-lvim.builtin.nvimtree.setup.incremental_selection = {
+-- if you don't want all the parsers change this to a table of the ones you want
+lvim.builtin.treesitter.ensure_installed = "all"
+
+lvim.builtin.treesitter.ignore_install = { "haskell", "phpdoc" }
+lvim.builtin.treesitter.highlight.enabled = true
+lvim.builtin.treesitter.incremental_selection = {
   enable = true,
   keymaps = {
     init_selection = "<cr>",
@@ -71,12 +79,6 @@ lvim.builtin.nvimtree.setup.incremental_selection = {
     node_decremental = "<bs>",
   },
 }
--- if you don't want all the parsers change this to a table of the ones you want
-lvim.builtin.treesitter.ensure_installed = "all"
-
-lvim.builtin.treesitter.ignore_install = { "haskell", "phpdoc" }
-lvim.builtin.treesitter.highlight.enabled = true
-
 -- generic LSP settings
 
 -- ---@usage disable automatic installation of servers
@@ -177,6 +179,18 @@ lvim.plugins = {
       require("autosave").setup()
     end,
   },
+  {
+    'rmagatti/auto-session',
+    config = function()
+      require('auto-session').setup {
+        log_level = 'info',
+        -- auto_session_suppress_dirs = { '~/' },
+        auto_session_enabled = true,
+        auto_session_create_enabled = true,
+        auto_session_use_git_branch = true
+      }
+    end
+  }
 
 }
 
@@ -194,7 +208,7 @@ function GrepInputStringImmediately()
   require("telescope.builtin").grep_string({ search = default })
 end
 
-lvim.builtin.which_key.mappings["a"] = { "<cmd>lua GrepInputStringImmediately()<CR>", "Grep Text under cursor" }
+lvim.builtin.which_key.mappings["F"] = { "<cmd>lua GrepInputStringImmediately()<CR>", "Grep Text under cursor" }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- vim.api.nvim_create_autocmd("BufEnter", {
