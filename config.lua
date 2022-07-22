@@ -10,6 +10,16 @@ an executable
 
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 
+-- Save on buffer switch
+vim.cmd([[
+  augroup AutoWrite
+    autocmd! BufLeave * silent! w
+  augroup END
+]])
+
+-- Save on app focus lost
+vim.cmd("au FocusLost * silent! w")
+
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save = true
@@ -21,6 +31,10 @@ lvim.colorscheme = "onedarker"
 lvim.leader = ","
 -- add your own keymapping
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
+-- Don't yank on some commands
+vim.api.nvim_set_keymap("v", "p", '"_dP', { noremap = true, silent = true })
+vim.api.nvim_set_keymap("x", "c", '"_c', { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "c", '"_c', { noremap = true, silent = true })
 -- unmap a default keymapping
 -- vim.keymap.del("n", "<C-Up>")
 -- override a default keymapping
@@ -45,7 +59,7 @@ lvim.builtin.telescope.defaults.mappings = {
 }
 
 -- Use which-key to add extra bindings with the leader-key prefix
--- lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
+lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 -- lvim.builtin.which_key.mappings["t"] = {
 --   name = "+Trouble",
 --   r = { "<cmd>Trouble lsp_references<cr>", "References" },
@@ -79,6 +93,15 @@ lvim.builtin.treesitter.incremental_selection = {
     node_decremental = "<bs>",
   },
 }
+
+-- Don't overwrite the text following when hitting return on an suggested selection
+local cmp = require "cmp"
+lvim.builtin.cmp.mapping["<CR>"] = cmp.mapping.confirm {
+  behavior = cmp.ConfirmBehavior.Insert,
+}
+
+
+
 -- generic LSP settings
 
 -- ---@usage disable automatic installation of servers
@@ -155,10 +178,18 @@ lvim.plugins = {
   {
     "vim-test/vim-test",
     cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
+    keys = { "<localleader>tf", "<localleader>tn", "<localleader>ts" },
     config = function()
-      vim.cmd "let test#strategy='vimux'"
-      vim.cmd "let test#elixir#exunit#executable = 'MIX_ENV=test mix test'"
-    end
+      -- vim.cmd "let test#elixir#exunit#executable = 'MIX_ENV=test mix test'"
+      vim.cmd [[
+          function! ToggleTermStrategy(cmd) abort
+            call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
+          endfunction
+          let g:test#elixir#exunit#executable = ',test'
+          let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
+        ]]
+      vim.g["test#strategy"] = "toggleterm"
+    end,
   },
   { "tpope/vim-abolish" },
   { "tpope/vim-endwise" },
@@ -174,12 +205,6 @@ lvim.plugins = {
   { "nvim-treesitter/nvim-treesitter-textobjects" },
   { "ray-x/lsp_signature.nvim" },
   {
-    "Pocco81/AutoSave.nvim",
-    config = function()
-      require("autosave").setup()
-    end,
-  },
-  {
     'rmagatti/auto-session',
     config = function()
       require('auto-session').setup {
@@ -190,8 +215,17 @@ lvim.plugins = {
         auto_session_use_git_branch = true
       }
     end
-  }
+  },
 
+  -- colorschemes --
+  { "rktjmp/lush.nvim" },
+  { "lunarvim/darkplus.nvim" },
+  { "mhartington/oceanic-next" },
+  { "ChristianChiarulli/nvcode-color-schemes.vim" },
+  { "briones-gabriel/darcula-solid.nvim" },
+  { "shaunsingh/nord.nvim" },
+  { "romainl/Apprentice" },
+  { "shaunsingh/solarized.nvim" },
 }
 
 lvim.builtin.which_key.mappings["t"] = {
@@ -201,6 +235,14 @@ lvim.builtin.which_key.mappings["t"] = {
   s = { "<cmd>TestSuite<cr>", "Suite" },
   l = { "<cmd>TestLast<cr>", "Last" },
   g = { "<cmd>TestVisit<cr>", "Visit" },
+}
+
+lvim.builtin.which_key.mappings["x"] = {
+  name = "Files",
+  p = { '<cmd>let @+=expand("%")<cr>', "Copy relative path" },
+  P = { '<cmd>let @+=expand("%:p")<cr>', "Copy absolute path" },
+  f = { '<cmd>let @+=expand("%:t")<cr>', "Copy filename" },
+  F = { '<cmd>let @+=expand("%:p:h")<cr>', "Copy directory" },
 }
 
 function GrepInputStringImmediately()
