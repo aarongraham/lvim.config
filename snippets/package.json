@@ -1,0 +1,19 @@
+{
+  "name": "nvim-snippets",
+  "author": "Aaron Graham",
+  "engines": {
+    "vscode": "^1.11.0"
+  },
+  "contributes": {
+    "snippets": [
+      {
+        "language": "javascript",
+        "path": "./javascript.json"
+      },
+      {
+        "language": "elixir",
+        "path": "./elixir.json"
+      }
+    ]
+  }
+}

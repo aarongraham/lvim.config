@@ -1,0 +1,9 @@
+{
+  "console log with label": {
+    "prefix": "clog",
+    "body": [
+      "console.log(\"***********\", { $1 })"
+    ],
+    "description": "console log vars"
+  }
+}
