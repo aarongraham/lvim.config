@@ -106,6 +106,24 @@ lvim.builtin.treesitter.incremental_selection = {
     node_decremental = "<bs>",
   },
 }
+lvim.builtin.treesitter.textobjects = {
+  select = {
+    enable = true,
+    -- Automatically jump forward to textobj, similar to targets.vim
+    lookahead = true,
+    keymaps = {
+      -- You can use the capture groups defined in textobjects.scm
+      ["af"] = "@function.outer",
+      ["if"] = "@function.inner",
+      ["ac"] = "@class.outer",
+      ["ic"] = "@class.inner",
+    },
+  },
+  swap = {
+    enable = false,
+    -- swap_next = textobj_swap_keymaps,
+  },
+}
 
 -- Don't overwrite the text following when hitting return on an suggested selection
 local cmp = require "cmp"
