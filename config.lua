@@ -8,7 +8,16 @@ an executable
 ]]
 -- THESE ARE EXAMPLE CONFIGS FEEL FREE TO CHANGE TO WHATEVER YOU WANT
 
+-- Save everything in the session save state
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
+
+-- Make 0 act like ^
+vim.cmd("map 0 ^")
+
+-- Make j and k move to the next line when line wrapping is on
+vim.cmd("nnoremap j gj")
+vim.cmd("nnoremap k gk")
+
 
 -- Save on buffer switch
 vim.cmd([[
@@ -43,6 +52,7 @@ vim.api.nvim_set_keymap("n", "c", '"_c', { noremap = true, silent = true })
 -- Change Telescope navigation to use j and k for navigation and n and p for history in both input and normal mode.
 -- we use protected-mode (pcall) just in case the plugin wasn't loaded yet.
 local _, actions = pcall(require, "telescope.actions")
+local _, trouble = pcall(require, "trouble.providers.telescope")
 lvim.builtin.telescope.defaults.mappings = {
   -- for input mode
   i = {
@@ -50,25 +60,28 @@ lvim.builtin.telescope.defaults.mappings = {
     ["<C-k>"] = actions.move_selection_previous,
     ["<C-n>"] = actions.cycle_history_next,
     ["<C-p>"] = actions.cycle_history_prev,
+    ["<C-x>"] = trouble.open_with_trouble
   },
   -- for normal mode
   n = {
     ["<C-j>"] = actions.move_selection_next,
     ["<C-k>"] = actions.move_selection_previous,
+    ["<c-x>"] = trouble.open_with_trouble,
   },
 }
 
 -- Use which-key to add extra bindings with the leader-key prefix
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
--- lvim.builtin.which_key.mappings["t"] = {
---   name = "+Trouble",
---   r = { "<cmd>Trouble lsp_references<cr>", "References" },
---   f = { "<cmd>Trouble lsp_definitions<cr>", "Definitions" },
---   d = { "<cmd>Trouble document_diagnostics<cr>", "Diagnostics" },
---   q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
---   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
---   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
--- }
+lvim.builtin.which_key.mappings["x"] = {
+  name = "+Trouble",
+  x = { "<cmd>TroubleToggle<cr>", "Trouble Toggle" },
+  r = { "<cmd>Trouble lsp_references<cr>", "References" },
+  f = { "<cmd>Trouble lsp_definitions<cr>", "Definitions" },
+  d = { "<cmd>Trouble document_diagnostics<cr>", "Diagnostics" },
+  q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
+  l = { "<cmd>Trouble loclist<cr>", "LocationList" },
+  w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
+}
 lvim.builtin.which_key.mappings["q"] = { "<cmd>qall<CR>", "Quit" }
 
 -- TODO: User Config for predefined plugins
@@ -174,18 +187,18 @@ linters.setup {
 --     },
 -- }
 
+lvim.builtin.terminal.execs[#lvim.builtin.terminal.execs + 1] = { ",test ", "<leader>tf", "Test File" }
+
 lvim.plugins = {
   {
     "vim-test/vim-test",
     cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
     keys = { "<localleader>tf", "<localleader>tn", "<localleader>ts" },
     config = function()
-      -- vim.cmd "let test#elixir#exunit#executable = 'MIX_ENV=test mix test'"
       vim.cmd [[
           function! ToggleTermStrategy(cmd) abort
             call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
           endfunction
-          let g:test#elixir#exunit#executable = ',test'
           let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
         ]]
       vim.g["test#strategy"] = "toggleterm"
@@ -193,7 +206,61 @@ lvim.plugins = {
   },
   { "tpope/vim-abolish" },
   { "tpope/vim-endwise" },
-  { "machakann/vim-sandwich" },
+  { "machakann/vim-sandwich", config = function()
+    vim.cmd([[
+      " vim-sandwich
+      let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
+      let g:sandwich#recipes += [
+            \   {
+            \     'buns'    : ['%{', '}'],
+            \     'filetype': ['elixir'],
+            \     'input'   : ['m'],
+            \     'nesting' : 1,
+            \   },
+            \   {
+            \     'buns'    : 'StructInput()',
+            \     'filetype': ['elixir'],
+            \     'kind'    : ['add', 'replace'],
+            \     'action'  : ['add'],
+            \     'input'   : ['M'],
+            \     'listexpr'    : 1,
+            \     'nesting' : 1,
+            \   },
+            \   {
+            \     'buns'    : ['%\w\+{', '}'],
+            \     'filetype': ['elixir'],
+            \     'input'   : ['M'],
+            \     'nesting' : 1,
+            \     'regex'   : 1,
+            \   },
+            \   {
+            \     'buns'    : ['{:ok, ', '}'],
+            \     'filetype': ['elixir'],
+            \     'input'   : ['o'],
+            \     'nesting' : 1,
+            \   },
+                  \   {
+            \     'buns'    : ['{:error, ', '}'],
+            \     'filetype': ['elixir'],
+            \     'input'   : ['e'],
+            \     'nesting' : 1,
+            \   },
+            \ ]
+
+      function! StructInput() abort
+        let s:StructLast = input('Struct: ')
+        if s:StructLast !=# ''
+          let struct = printf('%%%s{', s:StructLast)
+        else
+          throw 'OperatorSandwichCancel'
+        endif
+        return [struct, '}']
+      endfunction
+
+
+]]   )
+  end
+  },
   { "wellle/targets.vim", config = function()
     vim.cmd([[
       autocmd User targets#mappings#user call targets#mappings#extend({
@@ -216,6 +283,29 @@ lvim.plugins = {
       }
     end
   },
+  {
+    "folke/trouble.nvim",
+    requires = "kyazdani42/nvim-web-devicons",
+    config = function()
+      require("trouble").setup {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+      }
+    end
+  },
+  { "tpope/vim-projectionist"
+    --   config = function()
+    --   vim.cmd([[
+    --     let g:projectionist_heuristics = {
+    --       \ "lib/*.java": {"alternate": "src/test/java/{}.java"},
+    --       \ "src/test/java/*.java": {"alternate": "src/main/java/{}.java"}
+    --     \}
+    --   ]])
+    -- end
+  },
+  { "c-brenn/fuzzy-projectionist.vim" },
+  { "andyl/vim-projectionist-elixir" },
 
   -- colorschemes --
   { "rktjmp/lush.nvim" },
@@ -226,18 +316,17 @@ lvim.plugins = {
   { "shaunsingh/nord.nvim" },
   { "romainl/Apprentice" },
   { "shaunsingh/solarized.nvim" },
+  { "folke/tokyonight.nvim" }
 }
 
 lvim.builtin.which_key.mappings["t"] = {
-  name = "+Test",
-  t = { "<cmd>TestNearest<cr>", "Nearest" },
+  name = "Test",
   f = { "<cmd>TestFile<cr>", "File" },
+  n = { "<cmd>TestNearest<cr>", "Nearest" },
   s = { "<cmd>TestSuite<cr>", "Suite" },
-  l = { "<cmd>TestLast<cr>", "Last" },
-  g = { "<cmd>TestVisit<cr>", "Visit" },
 }
 
-lvim.builtin.which_key.mappings["x"] = {
+lvim.builtin.which_key.mappings["X"] = {
   name = "Files",
   p = { '<cmd>let @+=expand("%")<cr>', "Copy relative path" },
   P = { '<cmd>let @+=expand("%:p")<cr>', "Copy absolute path" },
