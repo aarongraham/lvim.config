@@ -18,6 +18,10 @@ vim.cmd("map 0 ^")
 vim.cmd("nnoremap j gj")
 vim.cmd("nnoremap k gk")
 
+-- Press ctrl+r to search and replace with confirm the selected text
+vim.cmd([[vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>]])
+-- Same as above but with no confirm
+-- vim.cmd([[vnoremap <C-r> "hy:%s/<C-r>h//g<left><left>]])
 
 -- Save on buffer switch
 vim.cmd([[
@@ -205,18 +209,17 @@ linters.setup {
 --     },
 -- }
 
-lvim.builtin.terminal.execs[#lvim.builtin.terminal.execs + 1] = { ",test ", "<leader>tf", "Test File" }
-
 lvim.plugins = {
   {
     "vim-test/vim-test",
     cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
-    keys = { "<localleader>tf", "<localleader>tn", "<localleader>ts" },
+    keys = { "<localleader>tt", "<localleader>tn", "<localleader>ts" },
     config = function()
       vim.cmd [[
           function! ToggleTermStrategy(cmd) abort
             call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
           endfunction
+          let g:test#elixir#exunit#executable = ',test'
           let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
         ]]
       vim.g["test#strategy"] = "toggleterm"
@@ -324,6 +327,7 @@ lvim.plugins = {
   },
   { "c-brenn/fuzzy-projectionist.vim" },
   { "andyl/vim-projectionist-elixir" },
+  { "tommcdo/vim-ninja-feet" },
 
   -- colorschemes --
   { "rktjmp/lush.nvim" },
@@ -338,10 +342,12 @@ lvim.plugins = {
 }
 
 lvim.builtin.which_key.mappings["t"] = {
-  name = "Test",
+  name = "+Test",
+  t = { "<cmd>TestNearest<cr>", "Nearest" },
   f = { "<cmd>TestFile<cr>", "File" },
-  n = { "<cmd>TestNearest<cr>", "Nearest" },
   s = { "<cmd>TestSuite<cr>", "Suite" },
+  l = { "<cmd>TestLast<cr>", "Last" },
+  g = { "<cmd>TestVisit<cr>", "Visit" },
 }
 
 lvim.builtin.which_key.mappings["X"] = {
