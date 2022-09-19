@@ -44,6 +44,9 @@ lvim.colorscheme = "onedarker"
 lvim.leader = ","
 -- add your own keymapping
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
+lvim.keys.normal_mode["<S-l>"] = ":BufferLineCycleNext<CR>"
+lvim.keys.normal_mode["<S-h>"] = ":BufferLineCyclePrev<CR>"
+
 -- Don't yank on some commands
 vim.api.nvim_set_keymap("v", "p", '"_dP', { noremap = true, silent = true })
 vim.api.nvim_set_keymap("x", "c", '"_c', { noremap = true, silent = true })
