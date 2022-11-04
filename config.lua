@@ -46,6 +46,7 @@ lvim.leader = ","
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 lvim.keys.normal_mode["<S-l>"] = ":BufferLineCycleNext<CR>"
 lvim.keys.normal_mode["<S-h>"] = ":BufferLineCyclePrev<CR>"
+lvim.keys.normal_mode["<S-x>"] = ":BufferClose<CR>"
 
 -- Don't yank on some commands
 vim.api.nvim_set_keymap("v", "p", '"_dP', { noremap = true, silent = true })
@@ -95,7 +96,6 @@ lvim.builtin.which_key.mappings["q"] = { "<cmd>qall<CR>", "Quit" }
 -- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
-lvim.builtin.notify.active = true
 lvim.builtin.terminal.active = true
 lvim.builtin.nvimtree.setup.view.side = "left"
 lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
@@ -341,7 +341,6 @@ lvim.plugins = {
   { "shaunsingh/nord.nvim" },
   { "romainl/Apprentice" },
   { "shaunsingh/solarized.nvim" },
-  { "folke/tokyonight.nvim" }
 }
 
 lvim.builtin.which_key.mappings["t"] = {
@@ -355,10 +354,10 @@ lvim.builtin.which_key.mappings["t"] = {
 
 lvim.builtin.which_key.mappings["X"] = {
   name = "Files",
-  p = { '<cmd>let @+=expand("%")<cr>', "Copy relative path" },
-  P = { '<cmd>let @+=expand("%:p")<cr>', "Copy absolute path" },
+  X = { '<cmd>let @+=expand("%")<cr>', "Copy relative path" },
+  p = { '<cmd>let @+=expand("%:p")<cr>', "Copy absolute path" },
   f = { '<cmd>let @+=expand("%:t")<cr>', "Copy filename" },
-  F = { '<cmd>let @+=expand("%:p:h")<cr>', "Copy directory" },
+  d = { '<cmd>let @+=expand("%:p:h")<cr>', "Copy directory" },
 }
 
 function GrepInputStringImmediately()
