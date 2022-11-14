@@ -10,7 +10,6 @@ an executable
 
 -- Save everything in the session save state
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
-
 -- Make 0 act like ^
 vim.cmd("map 0 ^")
 
@@ -61,6 +60,8 @@ vim.api.nvim_set_keymap("n", "c", '"_c', { noremap = true, silent = true })
 -- we use protected-mode (pcall) just in case the plugin wasn't loaded yet.
 local _, actions = pcall(require, "telescope.actions")
 local _, trouble = pcall(require, "trouble.providers.telescope")
+lvim.builtin.telescope.pickers.git_files.previewer = nil
+lvim.builtin.telescope.pickers.git_files.theme = nil
 lvim.builtin.telescope.defaults.mappings = {
   -- for input mode
   i = {
@@ -78,7 +79,6 @@ lvim.builtin.telescope.defaults.mappings = {
   },
 }
 
--- Use which-key to add extra bindings with the leader-key prefix
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 lvim.builtin.which_key.mappings["x"] = {
   name = "+Trouble",
@@ -126,8 +126,8 @@ lvim.builtin.treesitter.textobjects = {
       ["ic"] = "@class.inner",
     },
   },
+  enable = false,
   swap = {
-    enable = false,
     -- swap_next = textobj_swap_keymaps,
   },
 }
