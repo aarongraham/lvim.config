@@ -46,6 +46,9 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 lvim.keys.normal_mode["<S-l>"] = ":BufferLineCycleNext<CR>"
 lvim.keys.normal_mode["<S-h>"] = ":BufferLineCyclePrev<CR>"
 lvim.keys.normal_mode["<S-x>"] = ":BufferClose<CR>"
+lvim.keys.normal_mode["<S-'>"] = ":lua require('harpoon.mark').add_file()"
+lvim.keys.normal_mode["<S-.>"] = ":lua require('harpoon.ui').nav_next()"
+lvim.keys.normal_mode["<S-m>"] = ":lua require('harpoon.ui').nav_prev()"
 
 -- Don't yank on some commands
 vim.api.nvim_set_keymap("v", "p", '"_dP', { noremap = true, silent = true })
@@ -79,6 +82,11 @@ lvim.builtin.telescope.defaults.mappings = {
   },
 }
 
+lvim.builtin.telescope.on_config_done = function(telescope)
+  pcall(telescope.load_extension, "harpoon")
+  -- any other extensions loading
+end
+
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 lvim.builtin.which_key.mappings["x"] = {
   name = "+Trouble",
@@ -90,7 +98,7 @@ lvim.builtin.which_key.mappings["x"] = {
   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
 }
-lvim.builtin.which_key.mappings["q"] = { "<cmd>qall<CR>", "Quit" }
+lvim.builtin.which_key.mappings["q"] = { "<cmd>NvimTreeClose<cr><cmd>qall<CR>", "Quit" }
 
 -- TODO: User Config for predefined plugins
 -- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
@@ -186,8 +194,8 @@ formatters.setup {
 -- -- set additional linters
 local linters = require "lvim.lsp.null-ls.linters"
 linters.setup {
-  { command = "eslint" },
-  { command = "credo" }
+  -- { command = "eslint" },
+  -- { command = "credo" }
   --   { command = "flake8", filetypes = { "python" } },
   --   {
   --     -- each linter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
@@ -232,6 +240,19 @@ lvim.plugins = {
   { "tpope/vim-endwise" },
   { "machakann/vim-sandwich", config = function()
     vim.cmd([[
+      let g:sandwich_no_default_key_mappings = 1
+      silent! nmap <unique><silent> zd <Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)
+      silent! nmap <unique><silent> zr <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)
+      silent! nmap <unique><silent> zdb <Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
+      silent! nmap <unique><silent> zrb <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
+
+      let g:operator_sandwich_no_default_key_mappings = 1
+      " add
+      silent! map <unique> za <Plug>(operator-sandwich-add)
+      " delete
+      silent! xmap <unique> zd <Plug>(operator-sandwich-delete)
+      " replace
+      silent! xmap <unique> zr <Plug>(operator-sandwich-replace)
       " vim-sandwich
       let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
       let g:sandwich#recipes += [
@@ -303,7 +324,8 @@ lvim.plugins = {
         -- auto_session_suppress_dirs = { '~/' },
         auto_session_enabled = true,
         auto_session_create_enabled = true,
-        auto_session_use_git_branch = true
+        auto_session_use_git_branch = true,
+        pre_save_cmds = { "tabdo NvimTreeClose" }
       }
     end
   },
@@ -331,6 +353,10 @@ lvim.plugins = {
   { "c-brenn/fuzzy-projectionist.vim" },
   { "andyl/vim-projectionist-elixir" },
   { "tommcdo/vim-ninja-feet" },
+  { "ggandor/leap.nvim", config = function()
+    require('leap').add_default_mappings()
+  end
+  },
 
   -- colorschemes --
   { "rktjmp/lush.nvim" },
@@ -341,6 +367,25 @@ lvim.plugins = {
   { "shaunsingh/nord.nvim" },
   { "romainl/Apprentice" },
   { "shaunsingh/solarized.nvim" },
+  { "ThePrimeagen/harpoon", config = function()
+    require('harpoon').setup {
+      global_settings = {
+        -- sets the marks upon calling `toggle` on the ui, instead of require `:w`.
+        save_on_toggle = false,
+        -- saves the harpoon file upon every change. disabling is unrecommended.
+        save_on_change = true,
+        -- sets harpoon to run the command immediately as it's passed to the terminal when calling `sendCommand`.
+        enter_on_sendcmd = false,
+        -- closes any tmux windows harpoon that harpoon creates when you close Neovim.
+        tmux_autoclose_windows = false,
+        -- filetypes that you want to prevent from adding to the harpoon list menu.
+        excluded_filetypes = { "harpoon" },
+        -- set marks specific to each git branch inside git repository
+        mark_branch = true,
+      }
+    }
+  end
+  }
 }
 
 lvim.builtin.which_key.mappings["t"] = {
@@ -366,6 +411,7 @@ function GrepInputStringImmediately()
 end
 
 lvim.builtin.which_key.mappings["F"] = { "<cmd>lua GrepInputStringImmediately()<CR>", "Grep Text under cursor" }
+lvim.builtin.which_key.mappings["n"] = { "<cmd>Telescope harpoon marks<CR>", "Show marks" }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- vim.api.nvim_create_autocmd("BufEnter", {
