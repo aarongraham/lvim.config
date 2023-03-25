@@ -82,8 +82,13 @@ lvim.builtin.telescope.defaults.mappings = {
   },
 }
 
+-- stop thinking that src is the project root in kazaam
+lvim.builtin.project.patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn" }
+
 lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "harpoon")
+  pcall(telescope.load_extension, "fzy_native")
+
   -- any other extensions loading
 end
 
@@ -328,6 +333,11 @@ lvim.plugins = {
         pre_save_cmds = { "tabdo NvimTreeClose" }
       }
     end
+  },
+  {
+    "nvim-telescope/telescope-fzy-native.nvim",
+    run = "make",
+    event = "BufRead",
   },
   {
     "folke/trouble.nvim",
