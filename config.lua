@@ -235,7 +235,8 @@ lvim.plugins = {
           function! ToggleTermStrategy(cmd) abort
             call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
           endfunction
-          let g:test#elixir#exunit#executable = ',test'
+          " let g:test#elixir#exunit#executable = ',test'
+          let g:test#elixir#exunit#executable = 'mix test'
           let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
         ]]
       vim.g["test#strategy"] = "toggleterm"
@@ -377,6 +378,23 @@ lvim.plugins = {
   { "shaunsingh/nord.nvim" },
   { "romainl/Apprentice" },
   { "shaunsingh/solarized.nvim" },
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = false, },
+        panel = { enabled = false },
+      })
+    end,
+  },
+  { "zbirenbaum/copilot-cmp",
+    after = { "copilot.lua", "nvim-cmp" },
+    config = function()
+      require("copilot_cmp").setup()
+    end
+  },
   { "ThePrimeagen/harpoon", config = function()
     require('harpoon').setup {
       global_settings = {
@@ -397,6 +415,9 @@ lvim.plugins = {
   end
   }
 }
+
+lvim.builtin.cmp.formatting.source_names["copilot"] = "(Copilot)"
+table.insert(lvim.builtin.cmp.sources, 1, { name = "copilot" })
 
 lvim.builtin.which_key.mappings["t"] = {
   name = "+Test",
