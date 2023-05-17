@@ -46,9 +46,9 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 lvim.keys.normal_mode["<S-l>"] = ":BufferLineCycleNext<CR>"
 lvim.keys.normal_mode["<S-h>"] = ":BufferLineCyclePrev<CR>"
 lvim.keys.normal_mode["<S-x>"] = ":BufferClose<CR>"
-lvim.keys.normal_mode["<S-'>"] = ":lua require('harpoon.mark').add_file()"
-lvim.keys.normal_mode["<S-.>"] = ":lua require('harpoon.ui').nav_next()"
-lvim.keys.normal_mode["<S-m>"] = ":lua require('harpoon.ui').nav_prev()"
+-- lvim.keys.normal_mode["<S-'>"] = ":lua require('harpoon.mark').add_file()"
+-- lvim.keys.normal_mode["<S-.>"] = ":lua require('harpoon.ui').nav_next()"
+-- lvim.keys.normal_mode["<S-m>"] = ":lua require('harpoon.ui').nav_prev()"
 
 -- Don't yank on some commands
 vim.api.nvim_set_keymap("v", "p", '"_dP', { noremap = true, silent = true })
@@ -86,7 +86,7 @@ lvim.builtin.telescope.defaults.mappings = {
 lvim.builtin.project.patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn" }
 
 lvim.builtin.telescope.on_config_done = function(telescope)
-  pcall(telescope.load_extension, "harpoon")
+  -- pcall(telescope.load_extension, "harpoon")
   pcall(telescope.load_extension, "fzy_native")
 
   -- any other extensions loading
@@ -103,7 +103,7 @@ lvim.builtin.which_key.mappings["x"] = {
   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
 }
-lvim.builtin.which_key.mappings["q"] = { "<cmd>NvimTreeClose<cr><cmd>qall<CR>", "Quit" }
+lvim.builtin.which_key.mappings["q"] = { "<cmd>silent! {NvimTreeClose}<cr> <cmd>qall<CR>", "Quit" }
 
 -- TODO: User Config for predefined plugins
 -- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
@@ -235,8 +235,8 @@ lvim.plugins = {
           function! ToggleTermStrategy(cmd) abort
             call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
           endfunction
-          " let g:test#elixir#exunit#executable = ',test'
-          let g:test#elixir#exunit#executable = 'mix test'
+          let g:test#elixir#exunit#executable = ',test'
+          " let g:test#elixir#exunit#executable = 'mix test'
           let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
         ]]
       vim.g["test#strategy"] = "toggleterm"
@@ -244,8 +244,10 @@ lvim.plugins = {
   },
   { "tpope/vim-abolish" },
   { "tpope/vim-endwise" },
-  { "machakann/vim-sandwich", config = function()
-    vim.cmd([[
+  {
+    "machakann/vim-sandwich",
+    config = function()
+      vim.cmd([[
       let g:sandwich_no_default_key_mappings = 1
       silent! nmap <unique><silent> zd <Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)
       silent! nmap <unique><silent> zr <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)
@@ -309,16 +311,18 @@ lvim.plugins = {
       endfunction
 
 
-]]   )
-  end
+]])
+    end
   },
-  { "wellle/targets.vim", config = function()
-    vim.cmd([[
+  {
+    "wellle/targets.vim",
+    config = function()
+      vim.cmd([[
       autocmd User targets#mappings#user call targets#mappings#extend({
-        \ 'a': {'argument': [{'o': '[([{]', 'c': '[])}]', 's': ','}]}, 
+        \ 'a': {'argument': [{'o': '[([{]', 'c': '[])}]', 's': ','}]},
         \ })
     ]])
-  end
+    end
   },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
   { "ray-x/lsp_signature.nvim" },
@@ -335,14 +339,14 @@ lvim.plugins = {
       }
     end
   },
-  {
-    "nvim-telescope/telescope-fzy-native.nvim",
-    run = "make",
-    event = "BufRead",
-  },
+  -- {
+  --   "nvim-telescope/telescope-fzy-native.nvim",
+  --   build = "make",
+  --   event = "BufRead",
+  -- },
   {
     "folke/trouble.nvim",
-    requires = "kyazdani42/nvim-web-devicons",
+    -- requires = "kyazdani42/nvim-web-devicons",
     config = function()
       require("trouble").setup {
         -- your configuration comes here
@@ -364,11 +368,43 @@ lvim.plugins = {
   { "c-brenn/fuzzy-projectionist.vim" },
   { "andyl/vim-projectionist-elixir" },
   { "tommcdo/vim-ninja-feet" },
-  { "ggandor/leap.nvim", config = function()
-    require('leap').add_default_mappings()
-  end
+  {
+    "ggandor/leap.nvim",
+    config = function()
+      require('leap').add_default_mappings()
+    end
   },
-  { "elixir-tools/elixir-tools.nvim", requires = { "nvim-lua/plenary.nvim" },
+  {
+    "ruifm/gitlinker.nvim",
+    event = "BufRead",
+    config = function()
+      require("gitlinker").setup {
+        opts = {
+          -- remote = 'github', -- force the use of a specific remote
+          -- adds current line nr in the url for normal mode
+          add_current_line_on_normal_mode = true,
+          -- callback for what to do with the url
+          action_callback = require("gitlinker.actions").open_in_browser,
+          -- print the url after performing the action
+          print_url = false,
+          -- mapping to call url generation
+          mappings = "<leader>gy",
+        },
+        callbacks = {
+          ["gitlab-ssh.podium.com"] = function(url_data)
+            url_data.host = "gitlab.podium.com"
+            return
+                require "gitlinker.hosts".get_gitlab_type_url(url_data)
+          end
+        },
+
+      }
+    end,
+    dependencies = "nvim-lua/plenary.nvim",
+  },
+  {
+    "elixir-tools/elixir-tools.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       local elixir = require("elixir")
       local elixirls = require("elixir.elixirls")
@@ -450,31 +486,32 @@ lvim.plugins = {
       })
     end,
   },
-  { "zbirenbaum/copilot-cmp",
-    after = { "copilot.lua", "nvim-cmp" },
+  {
+    "zbirenbaum/copilot-cmp",
+    dependencies = { "copilot.lua", "nvim-cmp" },
     config = function()
       require("copilot_cmp").setup()
     end
   },
-  { "ThePrimeagen/harpoon", config = function()
-    require('harpoon').setup {
-      global_settings = {
-        -- sets the marks upon calling `toggle` on the ui, instead of require `:w`.
-        save_on_toggle = false,
-        -- saves the harpoon file upon every change. disabling is unrecommended.
-        save_on_change = true,
-        -- sets harpoon to run the command immediately as it's passed to the terminal when calling `sendCommand`.
-        enter_on_sendcmd = false,
-        -- closes any tmux windows harpoon that harpoon creates when you close Neovim.
-        tmux_autoclose_windows = false,
-        -- filetypes that you want to prevent from adding to the harpoon list menu.
-        excluded_filetypes = { "harpoon" },
-        -- set marks specific to each git branch inside git repository
-        mark_branch = true,
-      }
-    }
-  end
-  }
+  -- { "ThePrimeagen/harpoon", config = function()
+  --   require('harpoon').setup {
+  --     global_settings = {
+  --       -- sets the marks upon calling `toggle` on the ui, instead of require `:w`.
+  --       save_on_toggle = false,
+  --       -- saves the harpoon file upon every change. disabling is unrecommended.
+  --       save_on_change = true,
+  --       -- sets harpoon to run the command immediately as it's passed to the terminal when calling `sendCommand`.
+  --       enter_on_sendcmd = false,
+  --       -- closes any tmux windows harpoon that harpoon creates when you close Neovim.
+  --       tmux_autoclose_windows = false,
+  --       -- filetypes that you want to prevent from adding to the harpoon list menu.
+  --       excluded_filetypes = { "harpoon" },
+  --       -- set marks specific to each git branch inside git repository
+  --       mark_branch = true,
+  --     }
+  --   }
+  -- end
+  -- }
 }
 
 lvim.builtin.cmp.formatting.source_names["copilot"] = "(Copilot)"
@@ -503,7 +540,7 @@ function GrepInputStringImmediately()
 end
 
 lvim.builtin.which_key.mappings["F"] = { "<cmd>lua GrepInputStringImmediately()<CR>", "Grep Text under cursor" }
-lvim.builtin.which_key.mappings["n"] = { "<cmd>Telescope harpoon marks<CR>", "Show marks" }
+-- lvim.builtin.which_key.mappings["n"] = { "<cmd>Telescope harpoon marks<CR>", "Show marks" }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- vim.api.nvim_create_autocmd("BufEnter", {
