@@ -65,6 +65,25 @@ local _, actions = pcall(require, "telescope.actions")
 local _, trouble = pcall(require, "trouble.providers.telescope")
 lvim.builtin.telescope.pickers.git_files.previewer = nil
 lvim.builtin.telescope.pickers.git_files.theme = nil
+
+-- edit telescope layout https://github.com/LunarVim/LunarVim/issues/3406
+
+lvim.builtin.telescope.pickers.live_grep = {
+  layout_config = { height = 0.40, width = 0.70, anchor = "S" },
+}
+
+lvim.builtin.telescope.pickers.buffers = {
+  layout_config = { height = 0.40, width = 0.70, anchor = "S" },
+  layout_strategy = "center",
+}
+
+lvim.builtin.telescope.defaults.prompt_prefix = "  "
+lvim.builtin.telescope.defaults.selection_caret = "❯ "
+lvim.builtin.telescope.defaults.mappings.i["<esc>"] = actions.close
+lvim.builtin.telescope.defaults.winblend = 10
+
+-- end of telescope layout changes
+
 lvim.builtin.telescope.defaults.mappings = {
   -- for input mode
   i = {
@@ -72,7 +91,7 @@ lvim.builtin.telescope.defaults.mappings = {
     ["<C-k>"] = actions.move_selection_previous,
     ["<C-n>"] = actions.cycle_history_next,
     ["<C-p>"] = actions.cycle_history_prev,
-    ["<C-d>"] = actions.delete_buffer,
+    ["<C-c>"] = actions.delete_buffer,
     ["<C-x>"] = trouble.open_with_trouble
   },
   -- for normal mode
@@ -81,7 +100,7 @@ lvim.builtin.telescope.defaults.mappings = {
     ["<C-k>"] = actions.move_selection_previous,
     ["<C-n>"] = actions.cycle_history_next,
     ["<C-p>"] = actions.cycle_history_prev,
-    ["<C-d>"] = actions.delete_buffer,
+    ["<C-c>"] = actions.delete_buffer,
     ["<C-x>"] = trouble.open_with_trouble
   },
 }
@@ -512,8 +531,8 @@ function GrepInputStringImmediately()
 end
 
 lvim.builtin.which_key.mappings["F"] = { "<cmd>lua GrepInputStringImmediately()<CR>", "Grep Text under cursor" }
-lvim.builtin.which_key.mappings["bn"] = {}
-lvim.builtin.which_key.mappings["bb"] = { "<Cmd>Telescope buffers previewer=true<CR>", "Find Buffer" }
+lvim.builtin.which_key.mappings["B"] = { "<Cmd>Telescope buffers previewer=true<CR>", "Find Buffer" }
+
 -- lvim.builtin.which_key.mappings["n"] = { "<cmd>Telescope harpoon marks<CR>", "Show marks" }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
