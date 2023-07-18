@@ -72,13 +72,17 @@ lvim.builtin.telescope.defaults.mappings = {
     ["<C-k>"] = actions.move_selection_previous,
     ["<C-n>"] = actions.cycle_history_next,
     ["<C-p>"] = actions.cycle_history_prev,
+    ["<C-d>"] = actions.delete_buffer,
     ["<C-x>"] = trouble.open_with_trouble
   },
   -- for normal mode
   n = {
     ["<C-j>"] = actions.move_selection_next,
     ["<C-k>"] = actions.move_selection_previous,
-    ["<c-x>"] = trouble.open_with_trouble,
+    ["<C-n>"] = actions.cycle_history_next,
+    ["<C-p>"] = actions.cycle_history_prev,
+    ["<C-d>"] = actions.delete_buffer,
+    ["<C-x>"] = trouble.open_with_trouble
   },
 }
 
@@ -151,12 +155,11 @@ lvim.builtin.cmp.mapping["<CR>"] = cmp.mapping.confirm {
   behavior = cmp.ConfirmBehavior.Insert,
 }
 
-
-
 -- generic LSP settings
 
 -- ---@usage disable automatic installation of servers
--- lvim.lsp.automatic_servers_installation = false
+lvim.lsp.automatic_servers_installation = false
+-- lvim.lsp.automatic_configuration.skipped_servers = { "elixirls" }
 
 -- ---configure a server manually. !!Requires `:LvimCacheReset` to take effect!!
 -- ---see the full default list `:lua print(vim.inspect(lvim.lsp.automatic_configuration.skipped_servers))`
@@ -235,8 +238,8 @@ lvim.plugins = {
           function! ToggleTermStrategy(cmd) abort
             call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
           endfunction
-          let g:test#elixir#exunit#executable = ',test'
-          " let g:test#elixir#exunit#executable = 'mix test'
+          " let g:test#elixir#exunit#executable = ',test'
+          let g:test#elixir#exunit#executable = 'MIX_ENV=test mix test'
           let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
         ]]
       vim.g["test#strategy"] = "toggleterm"
@@ -339,11 +342,11 @@ lvim.plugins = {
       }
     end
   },
-  -- {
-  --   "nvim-telescope/telescope-fzy-native.nvim",
-  --   build = "make",
-  --   event = "BufRead",
-  -- },
+  {
+    "nvim-telescope/telescope-fzy-native.nvim",
+    build = "make",
+    event = "BufRead",
+  },
   {
     "folke/trouble.nvim",
     -- requires = "kyazdani42/nvim-web-devicons",
@@ -404,66 +407,35 @@ lvim.plugins = {
   },
   {
     "elixir-tools/elixir-tools.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       local elixir = require("elixir")
       local elixirls = require("elixir.elixirls")
 
       elixir.setup {
         credo = {
-          -- port = 9000, -- connect via TCP with the given port. mutually exclusive with `cmd`
-          -- cmd = "path/to/credo-language-server", -- path to the executable. mutually exclusive with `port`
-          on_attach = function(client, bufnr)
-            -- custom keybinds
-          end
+          enabled = true
         },
         elixirls = {
-          -- specify a repository and branch
-          -- repo = "mhanberg/elixir-ls", -- defaults to elixir-lsp/elixir-ls
-          -- branch = "mh/all-workspace-symbols", -- defaults to nil, just checkouts out the default branch, mutually exclusive with the `tag` option
-          -- tag = "v0.13.0", -- defaults to nil, mutually exclusive with the `branch` option
-
-          -- alternatively, point to an existing elixir-ls installation (optional)
-          -- not currently supported by elixirls, but can be a table if you wish to pass other args `{"path/to/elixirls", "--foo"}`
-          -- cmd = "/usr/local/bin/elixir-ls.sh",
-
-          -- default settings, use the `settings` function to override settings
+          enabled = true,
+          cmd = "/Users/aaron/.local/share/lvim/mason/packages/elixir-ls/language_server.sh",
           settings = elixirls.settings {
             dialyzerEnabled = true,
-            fetchDeps = false,
+            fetchDeps = true,
             enableTestLenses = false,
-            suggestSpecs = false,
+            suggestSpecs = true,
           },
-
-          on_attach = function(client, bufnr)
-            local map_opts = { buffer = true, noremap = true }
-
-            -- run the codelens under the cursor
-            vim.keymap.set("n", "<space>r", vim.lsp.codelens.run, map_opts)
-            -- remove the pipe operator
-            vim.keymap.set("n", "<space>fp", ":ElixirFromPipe<cr>", map_opts)
-            -- add the pipe operator
-            vim.keymap.set("n", "<space>tp", ":ElixirToPipe<cr>", map_opts)
-            vim.keymap.set("v", "<space>em", ":ElixirExpandMacro<cr>", map_opts)
-
-            -- bindings for standard LSP functions.
-            vim.keymap.set("n", "<space>df", "<cmd>lua vim.lsp.buf.format()<cr>", map_opts)
-            vim.keymap.set("n", "<space>gd", "<cmd>lua vim.diagnostic.open_float()<cr>", map_opts)
-            vim.keymap.set("n", "<space>dt", "<cmd>lua vim.lsp.buf.definition()<cr>", map_opts)
-            vim.keymap.set("n", "<space>K", "<cmd>lua vim.lsp.buf.hover()<cr>", map_opts)
-            vim.keymap.set("n", "<space>gD", "<cmd>lua vim.lsp.buf.implementation()<cr>", map_opts)
-            vim.keymap.set("n", "<space>1gD", "<cmd>lua vim.lsp.buf.type_definition()<cr>", map_opts)
-            -- keybinds for fzf-lsp.nvim: https://github.com/gfanto/fzf-lsp.nvim
-            -- you could also use telescope.nvim: https://github.com/nvim-telescope/telescope.nvim
-            -- there are also core vim.lsp functions that put the same data in the loclist
-            vim.keymap.set("n", "<space>gr", ":References<cr>", map_opts)
-            vim.keymap.set("n", "<space>g0", ":DocumentSymbols<cr>", map_opts)
-            vim.keymap.set("n", "<space>gW", ":WorkspaceSymbols<cr>", map_opts)
-            vim.keymap.set("n", "<leader>d", ":Diagnostics<cr>", map_opts)
-          end
+          on_attach = function(client, _bufnr)
+            -- vim.keymap.set("n", "<space>fp", ":ElixirFromPipe<cr>", { buffer = true, noremap = true })
+            -- vim.keymap.set("n", "<space>tp", ":ElixirToPipe<cr>", { buffer = true, noremap = true })
+            -- vim.keymap.set("v", "<space>em", ":ElixirExpandMacro<cr>", { buffer = true, noremap = true })
+          end,
         }
       }
-    end
+    end,
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
   },
 
   -- colorschemes --
@@ -482,7 +454,7 @@ lvim.plugins = {
     config = function()
       require("copilot").setup({
         suggestion = { enabled = false, },
-        panel = { enabled = false },
+        panel = { enabled = true },
       })
     end,
   },
@@ -540,6 +512,8 @@ function GrepInputStringImmediately()
 end
 
 lvim.builtin.which_key.mappings["F"] = { "<cmd>lua GrepInputStringImmediately()<CR>", "Grep Text under cursor" }
+lvim.builtin.which_key.mappings["bn"] = {}
+lvim.builtin.which_key.mappings["bb"] = { "<Cmd>Telescope buffers previewer=true<CR>", "Find Buffer" }
 -- lvim.builtin.which_key.mappings["n"] = { "<cmd>Telescope harpoon marks<CR>", "Show marks" }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
