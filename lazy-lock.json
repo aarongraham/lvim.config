@@ -10,8 +10,6 @@
   "cmp-nvim-lsp": { "branch": "main", "commit": "0e6b2ed705ddcff9738ec4ea838141654f12eeef" },
   "cmp-path": { "branch": "main", "commit": "91ff86cd9c29299a64f968ebb45846c485725f23" },
   "cmp_luasnip": { "branch": "master", "commit": "18095520391186d634a0045dacaa346291096566" },
-  "copilot-cmp": { "branch": "master", "commit": "4954dbf51b4286fa60351f76d187f0d1ca017591" },
-  "copilot.lua": { "branch": "master", "commit": "f306957de0f9730de4298bb1ea85c3735ef7cc43" },
   "darcula-solid.nvim": { "branch": "main", "commit": "d950b9ca20096313c435a93e57af7815766f3d3d" },
   "darkplus.nvim": { "branch": "master", "commit": "7c236649f0617809db05cd30fb10fed7fb01b83b" },
   "elixir-tools.nvim": { "branch": "main", "commit": "adb51b4ff66ccd1ece8d77e2f88e2a90bfa4a9df" },

@@ -172,7 +172,6 @@ lvim.plugins = {
   {
     "vim-test/vim-test",
     cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
-    keys = { "<localleader>tt", "<localleader>tn", "<localleader>ts" },
     config = function()
       vim.cmd [[
           function! ToggleTermStrategy(cmd) abort
@@ -180,6 +179,8 @@ lvim.plugins = {
           endfunction
           " let g:test#elixir#exunit#executable = ',test'
           let g:test#elixir#exunit#executable = 'MIX_ENV=test mix test'
+          let g:test#javascript#jest#executable = 'npm test --'
+
           let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
         ]]
       vim.g["test#strategy"] = "toggleterm"
