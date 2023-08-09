@@ -1,13 +1,3 @@
---[[
-lvim is the global options object
-
-Linters should be
-filled in as strings with either
-a global executable or a path to
-an executable
-]]
--- THESE ARE EXAMPLE CONFIGS FEEL FREE TO CHANGE TO WHATEVER YOU WANT
-
 -- Save everything in the session save state
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 -- Make 0 act like ^
@@ -36,8 +26,6 @@ vim.cmd("au FocusLost * silent! w")
 lvim.log.level = "warn"
 lvim.format_on_save = true
 lvim.colorscheme = "onedarker"
--- to disable icons and use a minimalist setup, uncomment the following
--- lvim.use_icons = false
 
 -- keymappings [view all the defaults by pressing <leader>Lk]
 lvim.leader = ","
@@ -80,12 +68,10 @@ lvim.builtin.telescope.pickers.buffers = {
 lvim.builtin.telescope.defaults.prompt_prefix = "  "
 lvim.builtin.telescope.defaults.selection_caret = "❯ "
 lvim.builtin.telescope.defaults.mappings.i["<esc>"] = actions.close
-lvim.builtin.telescope.defaults.winblend = 10
 
 -- end of telescope layout changes
 
 lvim.builtin.telescope.defaults.mappings = {
-  -- for input mode
   i = {
     ["<C-j>"] = actions.move_selection_next,
     ["<C-k>"] = actions.move_selection_previous,
@@ -94,7 +80,6 @@ lvim.builtin.telescope.defaults.mappings = {
     ["<C-c>"] = actions.delete_buffer,
     ["<C-x>"] = trouble.open_with_trouble
   },
-  -- for normal mode
   n = {
     ["<C-j>"] = actions.move_selection_next,
     ["<C-k>"] = actions.move_selection_previous,
@@ -109,7 +94,6 @@ lvim.builtin.telescope.defaults.mappings = {
 lvim.builtin.project.patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn" }
 
 lvim.builtin.telescope.on_config_done = function(telescope)
-  -- pcall(telescope.load_extension, "harpoon")
   pcall(telescope.load_extension, "fzy_native")
 
   -- any other extensions loading
@@ -128,14 +112,11 @@ lvim.builtin.which_key.mappings["x"] = {
 }
 lvim.builtin.which_key.mappings["q"] = { "<cmd>silent! {NvimTreeClose}<cr> <cmd>qall<CR>", "Quit" }
 
--- TODO: User Config for predefined plugins
--- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
 lvim.builtin.terminal.active = true
 lvim.builtin.nvimtree.setup.view.side = "left"
 lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
--- if you don't want all the parsers change this to a table of the ones you want
 lvim.builtin.treesitter.ensure_installed = "all"
 
 lvim.builtin.treesitter.ignore_install = { "haskell", "phpdoc" }
@@ -178,75 +159,15 @@ lvim.builtin.cmp.mapping["<CR>"] = cmp.mapping.confirm {
 
 -- ---@usage disable automatic installation of servers
 lvim.lsp.automatic_servers_installation = false
--- lvim.lsp.automatic_configuration.skipped_servers = { "elixirls" }
-
--- ---configure a server manually. !!Requires `:LvimCacheReset` to take effect!!
--- ---see the full default list `:lua print(vim.inspect(lvim.lsp.automatic_configuration.skipped_servers))`
--- vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "pyright" })
--- local opts = {} -- check the lspconfig documentation for a list of all possible options
--- require("lvim.lsp.manager").setup("pyright", opts)
-
--- ---remove a server from the skipped list, e.g. eslint, or emmet_ls. !!Requires `:LvimCacheReset` to take effect!!
--- ---`:LvimInfo` lists which server(s) are skiipped for the current filetype
--- vim.tbl_map(function(server)
---   return server ~= "emmet_ls"
--- end, lvim.lsp.automatic_configuration.skipped_servers)
-
--- -- you can set a custom on_attach function that will be used for all the language servers
--- -- See <https://github.com/neovim/nvim-lspconfig#keybindings-and-completion>
--- lvim.lsp.on_attach_callback = function(client, bufnr)
---   local function buf_set_option(...)
---     vim.api.nvim_buf_set_option(bufnr, ...)
---   end
---   --Enable completion triggered by <c-x><c-o>
---   buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
--- end
+vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "elixirls" })
 
 -- -- set a formatter, this will override the language server formatting capabilities (if it exists)
 local formatters = require "lvim.lsp.null-ls.formatters"
-formatters.setup {
-  --   { command = "black", filetypes = { "python" } },
-  --   { command = "isort", filetypes = { "python" } },
-  {
-    --     -- each formatter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
-    command = "prettier",
-    --     ---@usage arguments to pass to the formatter
-    --     -- these cannot contain whitespaces, options such as `--line-width 80` become either `{'--line-width', '80'}` or `{'--line-width=80'}`
-    --     extra_args = { "--print-with", "100" },
-    --     ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
-    -- filetypes = { "typescript", "typescriptreact" },
-  },
-}
+formatters.setup { { command = "prettier" } }
 
 -- -- set additional linters
 local linters = require "lvim.lsp.null-ls.linters"
-linters.setup {
-  -- { command = "eslint" },
-  -- { command = "credo" }
-  --   { command = "flake8", filetypes = { "python" } },
-  --   {
-  --     -- each linter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
-  --     command = "shellcheck",
-  --     ---@usage arguments to pass to the formatter
-  --     -- these cannot contain whitespaces, options such as `--line-width 80` become either `{'--line-width', '80'}` or `{'--line-width=80'}`
-  --     extra_args = { "--severity", "warning" },
-  --   },
-  --   {
-  --     command = "codespell",
-  --     ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
-  --     filetypes = { "javascript", "python" },
-  --   },
-}
-
--- Additional Plugins
--- lvim.plugins = {
---     {"folke/tokyonight.nvim"},
---     {
---       "folke/trouble.nvim",
---       cmd = "TroubleToggle",
---     },
--- }
-
+linters.setup {}
 lvim.plugins = {
   {
     "vim-test/vim-test",
@@ -353,7 +274,6 @@ lvim.plugins = {
     config = function()
       require('auto-session').setup {
         log_level = 'info',
-        -- auto_session_suppress_dirs = { '~/' },
         auto_session_enabled = true,
         auto_session_create_enabled = true,
         auto_session_use_git_branch = true,
@@ -368,13 +288,8 @@ lvim.plugins = {
   },
   {
     "folke/trouble.nvim",
-    -- requires = "kyazdani42/nvim-web-devicons",
     config = function()
-      require("trouble").setup {
-        -- your configuration comes here
-        -- or leave it empty to use the default settings
-        -- refer to the configuration section below
-      }
+      require("trouble").setup({})
     end
   },
   { "tpope/vim-projectionist"
@@ -402,14 +317,9 @@ lvim.plugins = {
     config = function()
       require("gitlinker").setup {
         opts = {
-          -- remote = 'github', -- force the use of a specific remote
-          -- adds current line nr in the url for normal mode
           add_current_line_on_normal_mode = true,
-          -- callback for what to do with the url
           action_callback = require("gitlinker.actions").open_in_browser,
-          -- print the url after performing the action
           print_url = false,
-          -- mapping to call url generation
           mappings = "<leader>gy",
         },
         callbacks = {
@@ -426,29 +336,27 @@ lvim.plugins = {
   },
   {
     "elixir-tools/elixir-tools.nvim",
+    version = "*",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local elixir = require("elixir")
       local elixirls = require("elixir.elixirls")
 
       elixir.setup {
-        credo = {
-          enabled = true
-        },
+        nextls = { enable = false },
+        credo = { enable = true },
         elixirls = {
-          enabled = true,
-          cmd = "/Users/aaron/.local/share/lvim/mason/packages/elixir-ls/language_server.sh",
+          enable = true,
           settings = elixirls.settings {
             dialyzerEnabled = true,
             fetchDeps = true,
             enableTestLenses = false,
-            suggestSpecs = true,
+            suggestSpecs = false,
           },
-          on_attach = function(client, _bufnr)
-            -- vim.keymap.set("n", "<space>fp", ":ElixirFromPipe<cr>", { buffer = true, noremap = true })
-            -- vim.keymap.set("n", "<space>tp", ":ElixirToPipe<cr>", { buffer = true, noremap = true })
-            -- vim.keymap.set("v", "<space>em", ":ElixirExpandMacro<cr>", { buffer = true, noremap = true })
+          on_attach = function(client, bufnr)
+            require("lvim.lsp").common_on_attach(client, bufnr)
           end,
+
         }
       }
     end,
@@ -466,47 +374,24 @@ lvim.plugins = {
   { "shaunsingh/nord.nvim" },
   { "romainl/Apprentice" },
   { "shaunsingh/solarized.nvim" },
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    config = function()
-      require("copilot").setup({
-        suggestion = { enabled = false, },
-        panel = { enabled = true },
-      })
-    end,
-  },
-  {
-    "zbirenbaum/copilot-cmp",
-    dependencies = { "copilot.lua", "nvim-cmp" },
-    config = function()
-      require("copilot_cmp").setup()
-    end
-  },
-  -- { "ThePrimeagen/harpoon", config = function()
-  --   require('harpoon').setup {
-  --     global_settings = {
-  --       -- sets the marks upon calling `toggle` on the ui, instead of require `:w`.
-  --       save_on_toggle = false,
-  --       -- saves the harpoon file upon every change. disabling is unrecommended.
-  --       save_on_change = true,
-  --       -- sets harpoon to run the command immediately as it's passed to the terminal when calling `sendCommand`.
-  --       enter_on_sendcmd = false,
-  --       -- closes any tmux windows harpoon that harpoon creates when you close Neovim.
-  --       tmux_autoclose_windows = false,
-  --       -- filetypes that you want to prevent from adding to the harpoon list menu.
-  --       excluded_filetypes = { "harpoon" },
-  --       -- set marks specific to each git branch inside git repository
-  --       mark_branch = true,
-  --     }
-  --   }
-  -- end
+  -- {
+  --   "zbirenbaum/copilot-cmp",
+  --   event = { "InsertEnter", "LspAttach" },
+  --   dependencies = { "zbirenbaum/copilot.lua" },
+  --   config = function()
+  --     vim.defer_fn(function()
+  --       require("copilot").setup({
+  --         suggestion = { enabled = false },
+  --         panel = { enabled = false },
+  --       })
+  --       require("copilot_cmp").setup() -- https://github.com/zbirenbaum/copilot-cmp/blob/master/README.md#configuration
+
+  --       lvim.builtin.cmp.formatting.source_names["copilot"] = "(Copilot)"
+  --       table.insert(lvim.builtin.cmp.sources, 1, { name = "copilot" })
+  --     end, 100)
+  --   end,
   -- }
 }
-
-lvim.builtin.cmp.formatting.source_names["copilot"] = "(Copilot)"
-table.insert(lvim.builtin.cmp.sources, 1, { name = "copilot" })
 
 lvim.builtin.which_key.mappings["t"] = {
   name = "+Test",
@@ -525,6 +410,13 @@ lvim.builtin.which_key.mappings["X"] = {
   d = { '<cmd>let @+=expand("%:p:h")<cr>', "Copy directory" },
 }
 
+lvim.builtin.which_key.mappings["C"] = {
+  name = "Code actions",
+  tp = { ":ElixirToPipe<cr>", "Elixir to pipe" },
+  fp = { ":ElixirFromPipe<cr>", "Elixir from pipe" },
+  em = { ":ElixirExpandMacro<cr>", "Expand macro" },
+}
+
 function GrepInputStringImmediately()
   local default = vim.api.nvim_eval([[expand("<cword>")]])
   require("telescope.builtin").grep_string({ search = default })
@@ -532,19 +424,3 @@ end
 
 lvim.builtin.which_key.mappings["F"] = { "<cmd>lua GrepInputStringImmediately()<CR>", "Grep Text under cursor" }
 lvim.builtin.which_key.mappings["B"] = { "<Cmd>Telescope buffers previewer=true<CR>", "Find Buffer" }
-
--- lvim.builtin.which_key.mappings["n"] = { "<cmd>Telescope harpoon marks<CR>", "Show marks" }
-
--- Autocommands (https://neovim.io/doc/user/autocmd.html)
--- vim.api.nvim_create_autocmd("BufEnter", {
---   pattern = { "*.json", "*.jsonc" },
---   -- enable wrap mode for json files only
---   command = "setlocal wrap",
--- })
--- vim.api.nvim_create_autocmd("FileType", {
---   pattern = "zsh",
---   callback = function()
---     -- let treesitter use bash highlight for zsh files as well
---     require("nvim-treesitter.highlight").attach(0, "bash")
---   end,
--- })
