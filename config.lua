@@ -177,8 +177,8 @@ lvim.plugins = {
           function! ToggleTermStrategy(cmd) abort
             call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
           endfunction
-          " let g:test#elixir#exunit#executable = ',test'
-          let g:test#elixir#exunit#executable = 'MIX_ENV=test mix test'
+          let g:test#elixir#exunit#executable = ',test'
+          " let g:test#elixir#exunit#executable = 'MIX_ENV=test mix test'
           let g:test#javascript#jest#executable = 'npm test --'
 
           let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
@@ -293,16 +293,7 @@ lvim.plugins = {
       require("trouble").setup({})
     end
   },
-  { "tpope/vim-projectionist"
-    --   config = function()
-    --   vim.cmd([[
-    --     let g:projectionist_heuristics = {
-    --       \ "lib/*.java": {"alternate": "src/test/java/{}.java"},
-    --       \ "src/test/java/*.java": {"alternate": "src/main/java/{}.java"}
-    --     \}
-    --   ]])
-    -- end
-  },
+  { "tpope/vim-projectionist" },
   { "tommcdo/vim-ninja-feet" },
   {
     "ggandor/leap.nvim",
@@ -407,11 +398,22 @@ lvim.plugins = {
 
 lvim.builtin.which_key.mappings["t"] = {
   name = "+Test",
-  t = { "<cmd>TestNearest<cr>", "Nearest" },
-  f = { "<cmd>TestFile<cr>", "File" },
-  s = { "<cmd>TestSuite<cr>", "Suite" },
-  l = { "<cmd>TestLast<cr>", "Last" },
-  g = { "<cmd>TestVisit<cr>", "Visit" },
+  r = { '<cmd>lua require("neotest").run.run()<CR>', "Nearest" },
+  f = { '<cmd>lua require("neotest").run.run(vim.fn.expand("%"))<CR>', "Nearest" },
+  c = { '<cmd>lua require("neotest").run.stop()<CR>', "Stop" },
+  s = { '<cmd>lua require("neotest").summary.toggle()<CR>', "Summary Toggle" },
+  k = { '<cmd>lua require("neotest").jump.prev({ status = "failed" })<CR>', "Jump to previous failed test" },
+  j = { '<cmd>lua require("neotest").jump.next({ status = "failed" })<CR>', "Jump to next failed test" },
+  o = { '<cmd>NeoTest output<CR>', "Show test output" },
+  O = { '<cmd>NeoTest output-panel<CR>', "Toggle output panel" },
+  t = {
+    name = "Terminal Tests",
+    r = { "<cmd>TestNearest<cr>", "Nearest" },
+    f = { "<cmd>TestFile<cr>", "File" },
+    s = { "<cmd>TestSuite<cr>", "Suite" },
+    l = { "<cmd>TestLast<cr>", "Last" },
+    g = { "<cmd>TestVisit<cr>", "Visit" },
+  }
 }
 
 lvim.builtin.which_key.mappings["X"] = {
