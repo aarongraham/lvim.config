@@ -406,6 +406,9 @@ lvim.builtin.which_key.mappings["t"] = {
   j = { '<cmd>lua require("neotest").jump.next({ status = "failed" })<CR>', "Jump to next failed test" },
   o = { '<cmd>NeoTest output<CR>', "Show test output" },
   O = { '<cmd>NeoTest output-panel<CR>', "Toggle output panel" },
+  w = { '<cmd>lua require("neotest").watch.toggle()<CR>', "Watch Nearest" },
+  W = { '<cmd>lua require("neotest").watch.toggle(vim.fn.expand("%"))<CR>', "Watch File" },
+
   t = {
     name = "Terminal Tests",
     r = { "<cmd>TestNearest<cr>", "Nearest" },
