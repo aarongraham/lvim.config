@@ -303,8 +303,6 @@ lvim.plugins = {
     --   ]])
     -- end
   },
-  { "c-brenn/fuzzy-projectionist.vim" },
-  { "andyl/vim-projectionist-elixir" },
   { "tommcdo/vim-ninja-feet" },
   {
     "ggandor/leap.nvim",
