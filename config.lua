@@ -355,13 +355,26 @@ lvim.plugins = {
           on_attach = function(client, bufnr)
             require("lvim.lsp").common_on_attach(client, bufnr)
           end,
-
         }
       }
     end,
     dependencies = {
       "nvim-lua/plenary.nvim",
     },
+  },
+  {
+    "nvim-neotest/neotest",
+    dependencies = {
+      "jfpedroza/neotest-elixir",
+      "antoinemadec/FixCursorHold.nvim"
+    },
+    config = function()
+      require("neotest").setup({
+        adapters = {
+          require("neotest-elixir"),
+        }
+      })
+    end
   },
 
   -- colorschemes --
