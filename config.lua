@@ -156,6 +156,16 @@ lvim.builtin.cmp.mapping["<CR>"] = cmp.mapping.confirm {
   behavior = cmp.ConfirmBehavior.Insert,
 }
 
+local function close_nvim_tree()
+  local api = require "nvim-tree.api"
+  api.tree.close()
+end
+
+local function close_neotest()
+  local neotest = require("neotest")
+  neotest.summary.close()
+end
+
 -- generic LSP settings
 
 -- ---@usage disable automatic installation of servers
@@ -279,7 +289,7 @@ lvim.plugins = {
         auto_session_enabled = true,
         auto_session_create_enabled = true,
         auto_session_use_git_branch = true,
-        pre_save_cmds = { "tabdo NvimTreeClose" }
+        pre_save_cmds = { close_nvim_tree, close_neotest }
       }
     end
   },
