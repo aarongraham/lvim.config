@@ -110,7 +110,8 @@ lvim.builtin.which_key.mappings["x"] = {
   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
 }
-lvim.builtin.which_key.mappings["q"] = { "<cmd>silent! {NvimTreeClose}<cr> <cmd>qall<CR>", "Quit" }
+lvim.builtin.which_key.mappings["q"] = {
+  "<cmd>silent! {NvimTreeClose}<cr> <cmd>silent! {Neotest summary close}<cr> <cmd>qall<CR>", "Quit" }
 
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
@@ -178,8 +179,8 @@ lvim.plugins = {
             call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
           endfunction
           let g:test#elixir#exunit#executable = ',test'
-          " let g:test#elixir#exunit#executable = 'MIX_ENV=test mix test'
-          let g:test#javascript#jest#executable = 'npm test --'
+          let g:test#elixir#exunit#executable = 'MIX_ENV=test mix test'
+          " let g:test#javascript#jest#executable = 'npm test --'
 
           let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
         ]]
@@ -333,7 +334,19 @@ lvim.plugins = {
       local elixirls = require("elixir.elixirls")
 
       elixir.setup {
-        nextls = { enable = false },
+        nextls = {
+          enable = false,
+          init_options = {
+            experimental = {
+              completions = {
+                enable = true
+              }
+            }
+          },
+          on_attach = function(client, bufnr)
+            require("lvim.lsp").common_on_attach(client, bufnr)
+          end,
+        },
         credo = { enable = true },
         elixirls = {
           enable = true,
@@ -367,7 +380,34 @@ lvim.plugins = {
       })
     end
   },
+  {
+    'nvim-orgmode/orgmode',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter'
+    },
+    config = function()
+      -- Load custom treesitter grammar for org filetype
+      require('orgmode').setup_ts_grammar()
 
+      -- Treesitter configuration
+      require('nvim-treesitter.configs').setup {
+        -- If TS highlights are not enabled at all, or disabled via `disable` prop,
+        -- highlighting will fallback to default Vim syntax highlighting
+        highlight = {
+          enable = true,
+          -- Required for spellcheck, some LaTex highlights and
+          -- code block highlights that do not have ts grammar
+          additional_vim_regex_highlighting = { 'org' },
+        },
+        ensure_installed = { 'org' }, -- Or run :TSUpdate org
+      }
+
+      require('orgmode').setup({
+        org_agenda_files = { '~/orgmode/*' },
+        org_default_notes_file = '~/orgmode/refile.org',
+      })
+    end
+  },
   -- colorschemes --
   { "rktjmp/lush.nvim" },
   { "lunarvim/darkplus.nvim" },
@@ -404,8 +444,8 @@ lvim.builtin.which_key.mappings["t"] = {
   s = { '<cmd>lua require("neotest").summary.toggle()<CR>', "Summary Toggle" },
   k = { '<cmd>lua require("neotest").jump.prev({ status = "failed" })<CR>', "Jump to previous failed test" },
   j = { '<cmd>lua require("neotest").jump.next({ status = "failed" })<CR>', "Jump to next failed test" },
-  o = { '<cmd>NeoTest output<CR>', "Show test output" },
-  O = { '<cmd>NeoTest output-panel<CR>', "Toggle output panel" },
+  o = { '<cmd>Neotest output<CR>', "Show test output" },
+  O = { '<cmd>Neotest output-panel<CR>', "Toggle output panel" },
   w = { '<cmd>lua require("neotest").watch.toggle()<CR>', "Watch Nearest" },
   W = { '<cmd>lua require("neotest").watch.toggle(vim.fn.expand("%"))<CR>', "Watch File" },
 
