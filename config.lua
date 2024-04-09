@@ -22,6 +22,12 @@ vim.cmd([[
 -- Save on app focus lost
 vim.cmd("au FocusLost * silent! w")
 
+-- Disable vim command window because I open it accidentally too often
+vim.cmd("map q: <Nop>")
+
+-- Disable vim ex mode
+vim.cmd("nnoremap Q <nop>")
+
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save = true
@@ -360,6 +366,7 @@ lvim.plugins = {
         credo = { enable = true },
         elixirls = {
           enable = true,
+          tag = "v0.20.0",
           settings = elixirls.settings {
             dialyzerEnabled = true,
             fetchDeps = true,
@@ -379,6 +386,7 @@ lvim.plugins = {
   {
     "nvim-neotest/neotest",
     dependencies = {
+      "nvim-neotest/nvim-nio",
       "jfpedroza/neotest-elixir",
       "antoinemadec/FixCursorHold.nvim"
     },
@@ -387,34 +395,6 @@ lvim.plugins = {
         adapters = {
           require("neotest-elixir"),
         }
-      })
-    end
-  },
-  {
-    'nvim-orgmode/orgmode',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter'
-    },
-    config = function()
-      -- Load custom treesitter grammar for org filetype
-      require('orgmode').setup_ts_grammar()
-
-      -- Treesitter configuration
-      require('nvim-treesitter.configs').setup {
-        -- If TS highlights are not enabled at all, or disabled via `disable` prop,
-        -- highlighting will fallback to default Vim syntax highlighting
-        highlight = {
-          enable = true,
-          -- Required for spellcheck, some LaTex highlights and
-          -- code block highlights that do not have ts grammar
-          additional_vim_regex_highlighting = { 'org' },
-        },
-        ensure_installed = { 'org' }, -- Or run :TSUpdate org
-      }
-
-      require('orgmode').setup({
-        org_agenda_files = { '~/orgmode/*' },
-        org_default_notes_file = '~/orgmode/refile.org',
       })
     end
   },
@@ -427,23 +407,6 @@ lvim.plugins = {
   { "shaunsingh/nord.nvim" },
   { "romainl/Apprentice" },
   { "shaunsingh/solarized.nvim" },
-  -- {
-  --   "zbirenbaum/copilot-cmp",
-  --   event = { "InsertEnter", "LspAttach" },
-  --   dependencies = { "zbirenbaum/copilot.lua" },
-  --   config = function()
-  --     vim.defer_fn(function()
-  --       require("copilot").setup({
-  --         suggestion = { enabled = false },
-  --         panel = { enabled = false },
-  --       })
-  --       require("copilot_cmp").setup() -- https://github.com/zbirenbaum/copilot-cmp/blob/master/README.md#configuration
-
-  --       lvim.builtin.cmp.formatting.source_names["copilot"] = "(Copilot)"
-  --       table.insert(lvim.builtin.cmp.sources, 1, { name = "copilot" })
-  --     end, 100)
-  --   end,
-  -- }
 }
 
 lvim.builtin.which_key.mappings["t"] = {
